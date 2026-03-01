@@ -180,7 +180,7 @@ export class DocumentsManager {
 
     const token = await this.authManager.getToken();
 
-    return `${this.httpClient['axiosInstance'].defaults.baseURL}/documents/${documentId}/pdf?token=${token}`;
+    return `${this.httpClient['axiosInstance'].defaults.baseURL}/Pdf/${documentId}?token=${token}`;
   }
 
   /**
