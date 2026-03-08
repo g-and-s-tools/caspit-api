@@ -36,7 +36,7 @@ export class ClientsManager {
   private mapApiClientToClient(apiClient: CaspitApiClient): CaspitClient {
     return {
       id: apiClient.ContactId,
-      name: apiClient.Name || apiClient.BusinessName || '',
+      name: apiClient.BusinessName || apiClient.Name || '',
       type: apiClient.ContactType === 1 ? 1 : 2,
       taxId: apiClient.OsekMorshe || undefined,
       email: apiClient.Email || undefined,
