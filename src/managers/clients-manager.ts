@@ -222,39 +222,45 @@ export class ClientsManager {
       throw new ValidationError('Tax ID is required', 'taxId');
     }
 
-    const token = await this.authManager.getToken();
+    const str = String(taxId);
+    const stripped = str.replace(/^0+/, '') || '0';
+    const variants = [...new Set([str, stripped, stripped.padStart(9, '0')])];
 
-    const params: Record<string, unknown> = {
-      token,
-      osekmorshe: taxId,
-      d: 1, // Required parameter for the query to work correctly (per Caspit API FAQ)
-    };
+    for (const variant of variants) {
+      const token = await this.authManager.getToken();
 
-    try {
-      const response = await this.httpClient.get<CaspitApiClient>(
-        '/contacts',
-        { params }
-      );
+      const params: Record<string, unknown> = {
+        token,
+        osekmorshe: variant,
+        d: 1, // Required parameter for the query to work correctly (per Caspit API FAQ)
+      };
 
-      // With d=1, the API returns a single client object directly (not a paginated response)
-      const apiClient = response.data;
+      try {
+        const response = await this.httpClient.get<CaspitApiClient>(
+          '/contacts',
+          { params }
+        );
 
-      // If the client exists and has a ContactId, return it as an array
-      if (apiClient && apiClient.ContactId) {
-        return [this.mapApiClientToClient(apiClient)];
+        // With d=1, the API returns a single client object directly (not a paginated response)
+        const apiClient = response.data;
+
+        // If the client exists and has a ContactId, map and check active flag
+        if (apiClient && apiClient.ContactId) {
+          const mapped = this.mapApiClientToClient(apiClient);
+          if (mapped.active !== false) {
+            return [mapped];
+          }
+        }
+      } catch (error) {
+        // Handle 404 (client not found) gracefully — try next variant
+        if (error instanceof APIError && error.statusCode === 404) {
+          continue;
+        }
+        throw error;
       }
-
-      // Return empty array if no client found
-      return [];
-    } catch (error) {
-      // Handle 404 (client not found) gracefully by returning empty array
-      if (error instanceof APIError && error.statusCode === 404) {
-        return [];
-      }
-
-      // Re-throw other errors
-      throw error;
     }
+
+    return [];
   }
 
   /**
