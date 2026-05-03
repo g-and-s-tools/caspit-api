@@ -36,6 +36,7 @@ export class ClientsManager {
   private mapApiClientToClient(apiClient: CaspitApiClient): CaspitClient {
     return {
       id: apiClient.ContactId,
+      clientNumber: apiClient.Number,
       name: apiClient.BusinessName || apiClient.Name || '',
       type: apiClient.ContactType === 1 ? 1 : 2,
       taxId: apiClient.OsekMorshe || undefined,
@@ -91,7 +92,7 @@ export class ClientsManager {
       data: (apiResponse.Results || []).map((apiClient) => this.mapApiClientToClient(apiClient)),
       total: apiResponse.TotalCount || 0,
       page: apiResponse.CurrentPage || options.page || 0,
-      limit: options.limit || (apiResponse.Results?.length || 50),
+      limit: options.limit || apiResponse.Results?.length || 50,
     };
   }
 
@@ -136,13 +137,9 @@ export class ClientsManager {
       Comments1: data.notes,
     };
 
-    const response = await this.httpClient.post<CaspitApiClient>(
-      '/contacts',
-      apiRequest,
-      {
-        params: { token },
-      }
-    );
+    const response = await this.httpClient.post<CaspitApiClient>('/contacts', apiRequest, {
+      params: { token },
+    });
 
     return this.mapApiClientToClient(response.data);
   }
@@ -236,10 +233,7 @@ export class ClientsManager {
       };
 
       try {
-        const response = await this.httpClient.get<CaspitApiClient>(
-          '/contacts',
-          { params }
-        );
+        const response = await this.httpClient.get<CaspitApiClient>('/contacts', { params });
 
         // With d=1, the API returns a single client object directly (not a paginated response)
         const apiClient = response.data;

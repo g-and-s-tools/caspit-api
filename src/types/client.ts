@@ -3,9 +3,14 @@
  */
 export interface CaspitClient {
   /**
-   * Client ID (internal Caspit ID)
+   * Client ID (ContactId from Caspit API - used for REST operations)
    */
   id?: string;
+
+  /**
+   * Client sequential number (Number from Caspit API - used as CustomerId in document creation)
+   */
+  clientNumber?: number;
 
   /**
    * Client name
