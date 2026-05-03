@@ -1,6 +1,6 @@
 {
   "name": "@g-and-s/caspit-api",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "TypeScript SDK for Caspit API - Authentication, Client Management, and Document Creation",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
