@@ -208,6 +208,47 @@ export class ClientsManager {
   }
 
   /**
+   * Find client by Caspit ContactId
+   * Returns empty array if not found (handles 404 gracefully)
+   */
+  async findByClientId(clientId: string): Promise<CaspitClient[]> {
+    if (!clientId || clientId.trim().length === 0) {
+      throw new ValidationError('Client ID is required', 'clientId');
+    }
+
+    try {
+      const client = await this.get(clientId.trim());
+      return client ? [client] : [];
+    } catch (error) {
+      if (error instanceof APIError && error.statusCode === 404) {
+        return [];
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Search by OsekMorshe (digits) or ContactId (UUID).
+   */
+  async findAny(query: string): Promise<CaspitClient[]> {
+    if (!query || query.trim().length === 0) {
+      throw new ValidationError('Search query is required', 'query');
+    }
+
+    const trimmed = query.trim();
+
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)) {
+      return this.findByClientId(trimmed);
+    }
+
+    if (/^\d+$/.test(trimmed)) {
+      return this.findByTaxId(trimmed);
+    }
+
+    return [];
+  }
+
+  /**
    * Find clients by Tax ID (OsekMorshe)
    * Uses the specific osekMorshe parameter for more accurate results
    * Note: The 'd' parameter is required by the Caspit API for this query to work correctly
