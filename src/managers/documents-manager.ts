@@ -268,11 +268,19 @@ export class DocumentsManager {
     // Map our format to Caspit API format
     const requestData: Record<string, unknown> = {
       TrxTypeId: data.type,
-      CustomerId: data.customerNumber !== undefined ? data.customerNumber : (data.customerId ? parseInt(data.customerId, 10) || data.customerId : undefined),
+      CustomerId: data.customerId,
       TrxCodeNumber: data.type ? this.getTransactionCodeNumber(data.type) : 100,
       Language: data.language || 'he',
       IncludeVAT: data.includeVat !== undefined ? data.includeVat : true,
     };
+
+    if (data.customerName) {
+      requestData.CustomerBusinessName = data.customerName;
+      requestData.CustomerContactName = data.customerName;
+    }
+    if (data.customerTaxId) {
+      requestData.CustomerOsekMorshe = data.customerTaxId;
+    }
 
     // Only add date fields if they exist
     if (data.date) {

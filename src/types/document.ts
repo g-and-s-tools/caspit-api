@@ -221,8 +221,8 @@ export interface CaspitDocument {
 export interface CreateDocumentRequest {
   type: DocumentType;
   customerId: string;
-  /** Numeric client number (Number field from Caspit API). When provided, used as CustomerId in the API payload instead of customerId string. */
-  customerNumber?: number;
+  customerName?: string;
+  customerTaxId?: string;
   date: string;
   dueDate?: string;
   items?: DocumentItem[];
